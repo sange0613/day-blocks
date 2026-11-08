@@ -2,40 +2,107 @@
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f8f8f4;color:#282d26;font:16px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}button,input{font:inherit}button{cursor:pointer;color:inherit}button:focus-visible{outline:2px solid #446649;outline-offset:3px}header,main,footer{max-width:1600px;margin:auto;padding:0 clamp(20px,5vw,90px)}header{height:82px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #d9dcd3}.brand{font-size:19px;font-weight:670;letter-spacing:2px;display:flex;gap:12px;align-items:center}.mark{display:grid;grid-template-columns:repeat(2,8px);gap:2px}.mark i{width:8px;height:8px;background:#354c39}.mark i:last-child{background:#a8be9e}.date,.mono,time,.hour,.bounds{font-family:ui-monospace,"SFMono-Regular",monospace;font-variant-numeric:tabular-nums}.date{font-size:13px;color:#666e61}.focus{padding:clamp(45px,8vh,90px) 0;display:flex;align-items:end;justify-content:space-between}.eyebrow{display:flex;align-items:center;gap:9px;color:#53694e;font-size:13px;letter-spacing:1px}.dot{width:7px;height:7px;border-radius:50%;background:#698b5e}h1{font-weight:530;letter-spacing:-.045em;font-size:clamp(42px,6vw,88px);line-height:1.22;margin:15px 0 12px;overflow-wrap:anywhere}.range{color:#6a7266;font-size:16px}.clock{font-size:clamp(32px,5vw,74px);letter-spacing:-.065em;font-weight:350}.toolbar{border-top:1px solid #cbd0c5;padding:23px 0;display:flex;align-items:center;justify-content:space-between}h2{font-size:18px;margin:0;font-weight:600}
 dialog button{border:1px solid #cdd1c6;border-radius:5px;background:transparent;padding:5px 11px}
-.track{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));column-gap:clamp(1px,.2vw,4px)}
-.card{min-width:0;padding:0;border:0;background:none;display:flex;align-items:center;flex-direction:column;gap:8px}
-.hour{font-size:clamp(10px,1vw,14px);color:#697160}
-.tile{display:block;width:100%;aspect-ratio:1;background:#e6eae1;border:1px solid #cbd3c4;border-radius:3px}
-.card strong{writing-mode:vertical-rl;font-weight:500;line-height:1.1;font-size:clamp(11px,1.15vw,18px);max-height:min(26vh,150px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.card.active{color:#425f34}.card.active .tile{background:#9ab87b;border-color:#658453}
-.card:hover .tile{border-color:#68825d}
-@media(max-width:600px){header,main{padding-inline:10px}.track{column-gap:1px}.tile{border-radius:1px}}
+
+.track{display:grid;grid-template-columns:repeat(48,minmax(0,1fr));position:relative;min-height:30px;align-items:center;background:linear-gradient(#cad1c4,#cad1c4) center/100% 1px no-repeat}
+.block{padding:0;margin:0 1px;aspect-ratio:1;background:#a6b89d;border:0;border-radius:2px;min-width:0}
+.block.active{background:#496941}.block:hover{background:#748e67}
+.scale{display:flex;justify-content:space-between;font:11px ui-monospace,monospace;color:#687261;margin-top:6px}
+.agenda{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:4px 12px;margin-top:18px}
+.item{display:flex;align-items:center;gap:7px;text-align:left;border:none;border-bottom:1px solid #dbe0d4;background:none;padding:6px 0;min-width:0}
+.item time{color:#626e59;font-size:12px}.item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.item.active{color:#496941;font-weight:650}
+#add,dialog button{border:1px solid #cdd1c6;background:#fdfefa;padding:6px 11px;border-radius:5px}
+select{font:inherit;width:100%;padding:8px;background:white;border:1px solid #adb8a4;border-radius:4px}
+#remove{margin-right:auto}
+@media(max-width:600px){header,main{padding-inline:14px}.block{margin:0 .5px;border-radius:1px}.agenda{grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 8px}.item{gap:3px;padding:3px 0}.item span,.item time{font-size:11px}.focus{padding:26px 0}#activity{font-size:34px}}
 .hint{margin:26px 0;color:#70776b;font-size:13px}dialog{border:1px solid #cbd1c3;border-radius:10px;padding:26px;width:min(360px,90vw);background:#f8f8f4;color:inherit}dialog::backdrop{background:#27332144}dialog label{display:block;margin:20px 0 7px}input{width:100%;padding:10px;border:1px solid #adb8a4;border-radius:4px}dialog menu{padding:0;margin:20px 0 0;display:flex;justify-content:end;gap:8px}dialog .save{background:#354c39;color:white}@media(max-width:580px){header{height:64px}.focus{align-items:start;position:relative}.clock{position:absolute;top:38px;right:0;font-size:25px}.focus h1{font-size:42px;margin-top:24px}.toolbar{padding:18px 0}.overview{margin-top:24px}.controls button{padding:5px 9px}}
-@media(max-height:500px){header{height:38px}.focus{padding:10px 0}.focus h1{font-size:26px;margin:4px 0}.toolbar{padding:8px 0}.hint{margin:8px 0}.clock{top:12px}.card strong{max-height:16vh}}</style></head><body><header><div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>时间块</div><span class="date" id="date"></span></header><main><section class="focus"><div><div class="eyebrow"><span class="dot"></span>此刻的安排</div><h1 id="activity"></h1><span class="range mono" id="range"></span></div><time class="clock" id="clock"></time></section><div class="toolbar"><h2>每日时间线</h2></div><section class="track" id="track" aria-label="24 小时时间线"></section><p class="hint">点击方块修改安排，每天按此重复。</p></main><dialog id="editor"><form id="form"><h2 id="editTitle"></h2><label for="entry">固定安排</label><input id="entry" maxlength="24" required autocomplete="off"><menu><button type="button" id="cancel">取消</button><button class="save">保存</button></menu></form></dialog>
+@media(max-height:500px){header{height:38px}.focus{padding:10px 0}.focus h1{font-size:26px;margin:4px 0}.toolbar{padding:8px 0}.hint{margin:8px 0}.clock{top:12px}.card strong{max-height:16vh}}</style></head><body><header><div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>时间块</div><span class="date" id="date"></span></header><main><section class="focus"><div><div class="eyebrow"><span class="dot"></span>此刻的安排</div><h1 id="activity"></h1><span class="range mono" id="range"></span></div><time class="clock" id="clock"></time></section><div class="toolbar"><h2>每日时间线</h2><button id="add">＋ 添加安排</button></div><section class="track" id="track" aria-label="24 小时时间线"></section><div class="scale"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div><div id="agenda" class="agenda"></div><p class="hint" id="hint"></p></main><dialog id="editor"><form id="form"><h2 id="editTitle"></h2><label for="slot">半小时时段</label><select id="slot"></select><label for="entry">固定安排</label><input id="entry" maxlength="24" required autocomplete="off"><menu><button type="button" id="remove">删除</button><button type="button" id="cancel">取消</button><button class="save">保存</button></menu></form></dialog>
 <script>
-const $=id=>document.getElementById(id),pad=n=>String(n).padStart(2,'0'),stamp=n=>pad(n)+':00';
-const plan=['睡眠','睡眠','睡眠','睡眠','睡眠','睡眠','起床洗漱','早餐','散步','专注工作','专注工作','处理事务','午餐','午休','专注工作','专注工作','整理收尾','运动','晚餐','自由时间','阅读','洗漱放松','准备入睡','睡眠'];
-const storage='day-blocks.v1';
-try{const saved=JSON.parse(localStorage.getItem(storage));if(Array.isArray(saved))plan.forEach((_,i)=>{if(typeof saved[i]==='string'&&saved[i].trim())plan[i]=saved[i].slice(0,24)})}catch{}
-let current=-1,editing=0;
-function edit(i){editing=i;$('editTitle').textContent=stamp(i)+' – '+stamp(i+1);$('entry').value=plan[i];$('editor').showModal();$('entry').select()}
-const track = $('track');
-plan.forEach((name, i) => {
-  const card = document.createElement('button');
-  card.className = 'card';
-  const hour = document.createElement('span');
-  hour.className = 'hour';
-  hour.textContent = pad(i);
-  const tile = document.createElement('span');
-  tile.className = 'tile';
-  const label = document.createElement('strong');
-  label.textContent = name;
-  card.append(hour, tile, label);
-  card.onclick = () => edit(i);
-  track.append(card);
-});
-function tick(){const d=new Date(),h=d.getHours();$('date').textContent=d.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'});$('clock').textContent=pad(h)+':'+pad(d.getMinutes());$('activity').textContent=plan[h];$('range').textContent=stamp(h)+' — '+stamp(h+1);if(current!==h){current=h;Array.from(track.children).forEach((card,i)=>card.classList.toggle('active',i===h))}}
-$('cancel').onclick=()=>$('editor').close();$('entry').oninput=()=>$('entry').setCustomValidity('');
-$('form').onsubmit=e=>{e.preventDefault();const v=$('entry').value.trim();if(!v){$('entry').setCustomValidity('请输入安排');$('entry').reportValidity();return}plan[editing]=v;try{localStorage.setItem(storage,JSON.stringify(plan))}catch{document.querySelector('.hint').textContent='浏览器无法保存，本次修改仅在当前页面有效。'}track.children[editing].querySelector('strong').textContent=v;$('editor').close();tick()};
-tick();setInterval(tick,1000);
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, '0');
+const stamp = i => pad(Math.floor(i / 2)) + (i % 2 ? ':30' : ':00');
+const range = i => stamp(i) + ' — ' + stamp(i + 1);
+const key = 'day-blocks.half-hours.v1';
+let plan = {};
+try {
+  const saved = JSON.parse(localStorage.getItem(key));
+  if (saved && typeof saved === 'object') plan = saved;
+  else {
+    // Keep edits from the hourly version. Untouched sample activities start empty.
+    const previous = JSON.parse(localStorage.getItem('day-blocks.v1'));
+    const samples = ['睡眠','睡眠','睡眠','睡眠','睡眠','睡眠','起床洗漱','早餐','散步','专注工作','专注工作','处理事务','午餐','午休','专注工作','专注工作','整理收尾','运动','晚餐','自由时间','阅读','洗漱放松','准备入睡','睡眠'];
+    if (Array.isArray(previous)) samples.forEach((sample,h) => {
+      if (typeof previous[h] === 'string' && previous[h].trim() && previous[h] !== sample)
+        plan[h*2] = plan[h*2+1] = previous[h];
+    });
+  }
+} catch {}
+let now = -1;
+function tick() {
+  const d = new Date();
+  const slot = d.getHours()*2 + Math.floor(d.getMinutes()/30);
+  $('date').textContent = d.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'});
+  $('clock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
+  $('activity').textContent = plan[slot] || '暂无安排';
+  $('range').textContent = range(slot);
+  if (now !== slot) { now = slot; render(); }
+}
+function render() {
+  $('track').replaceChildren();
+  $('agenda').replaceChildren();
+  for (let i = 0; i < 48; i++) {
+    if (!plan[i]) continue;
+    const block = document.createElement('button');
+    block.className = 'block' + (i === now ? ' active' : '');
+    block.style.gridColumn = String(i+1);
+    block.style.gridRow = '1';
+    block.title = range(i) + ' ' + plan[i];
+    block.setAttribute('aria-label', block.title);
+    block.onclick = () => edit(i);
+    $('track').append(block);
+    const item = document.createElement('button');
+    item.className = 'item' + (i === now ? ' active' : '');
+    const time = document.createElement('time'), name = document.createElement('span');
+    time.textContent = stamp(i); name.textContent = plan[i];
+    item.append(time,name); item.title = block.title; item.onclick = block.onclick;
+    $('agenda').append(item);
+  }
+  $('add').disabled = $('track').childElementCount === 48;
+  $('hint').textContent = $('track').childElementCount ? '' : '添加第一项安排，它会出现在对应的半小时。';
+}
+function edit(existing) {
+  const select = $('slot');
+  select.replaceChildren();
+  for (let i = 0; i < 48; i++) {
+    if (existing != null ? i !== existing : !!plan[i]) continue;
+    select.add(new Option(range(i), String(i)));
+  }
+  if (existing == null) {
+    const options = Array.from(select.options);
+    select.value = (options.find(o => Number(o.value) >= now) || options[0]).value;
+  }
+  select.disabled = existing != null;
+  $('entry').value = plan[select.value] || '';
+  $('remove').hidden = existing == null;
+  $('editTitle').textContent = existing == null ? '添加安排' : '修改安排';
+  $('entry').setCustomValidity('');
+  $('editor').showModal();
+  if (existing != null) $('entry').select();
+}
+function save() {
+  $('editor').close(); render(); tick();
+  try { localStorage.setItem(key, JSON.stringify(plan)); }
+  catch { $('hint').textContent = '浏览器无法保存，本次修改仅在当前页面有效。'; }
+}
+$('add').onclick = () => edit(null);
+$('cancel').onclick = () => $('editor').close();
+$('remove').onclick = () => { delete plan[$('slot').value]; save(); };
+$('entry').oninput = () => $('entry').setCustomValidity('');
+$('form').onsubmit = e => {
+  e.preventDefault();
+  const value = $('entry').value.trim();
+  if (!value) { $('entry').setCustomValidity('请输入安排'); $('entry').reportValidity(); return; }
+  plan[$('slot').value] = value; save();
+};
+tick(); setInterval(tick,1000);
 </script></body></html>
