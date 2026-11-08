@@ -6,7 +6,10 @@ dialog button{border:1px solid #cdd1c6;border-radius:5px;background:transparent;
 .track{display:grid;grid-template-columns:repeat(48,minmax(0,1fr));position:relative;min-height:30px;align-items:center;background:linear-gradient(#cad1c4,#cad1c4) center/100% 1px no-repeat}
 .block{padding:0;margin:0 1px;aspect-ratio:1;background:#a6b89d;border:0;border-radius:2px;min-width:0}
 .block.active{background:#496941}.block:hover{background:#748e67}
-.scale{display:flex;justify-content:space-between;font:11px ui-monospace,monospace;color:#687261;margin-top:6px}
+.scale{position:relative;isolation:isolate;font:11px ui-monospace,monospace;color:#687261;margin:6px 0}
+.scale span{position:absolute;width:max-content;white-space:nowrap;background:#f8f8f4;padding:2px 0}
+.scale .scheduled{font-weight:650;color:#394e35}
+.scale span::after{content:"";position:absolute;left:var(--anchor);top:100%;height:var(--stem);border-left:1px solid #a6b39e;z-index:-1}
 .agenda{position:relative}
 .item{position:absolute;width:max-content;max-width:min(12em,100%);display:grid;gap:2px;padding:3px 4px;border:0;background:#f8f8f4;text-align:center;font-size:14px;line-height:1.3;overflow-wrap:anywhere}
 .item time{font-size:10px;color:#687261}.item.active{color:#496941;font-weight:650}
@@ -17,7 +20,7 @@ select{font:inherit;width:100%;padding:8px;background:white;border:1px solid #ad
 #remove{margin-right:auto}
 @media(max-width:600px){header,main{padding-inline:14px}.block{margin:0 .5px;border-radius:1px}.item{font-size:12px;max-width:min(8em,100%)}.focus{padding:26px 0}#activity{font-size:34px}}
 .hint{margin:26px 0;color:#70776b;font-size:13px}dialog{border:1px solid #cbd1c3;border-radius:10px;padding:26px;width:min(360px,90vw);background:#f8f8f4;color:inherit}dialog::backdrop{background:#27332144}dialog label{display:block;margin:20px 0 7px}input{width:100%;padding:10px;border:1px solid #adb8a4;border-radius:4px}dialog menu{padding:0;margin:20px 0 0;display:flex;justify-content:end;gap:8px}dialog .save{background:#354c39;color:white}@media(max-width:580px){header{height:64px}.focus{align-items:start;position:relative}.clock{position:absolute;top:38px;right:0;font-size:25px}.focus h1{font-size:42px;margin-top:24px}.toolbar{padding:18px 0}.overview{margin-top:24px}.controls button{padding:5px 9px}}
-@media(max-height:500px){header{height:38px}.focus{padding:10px 0}.focus h1{font-size:26px;margin:4px 0}.toolbar{padding:8px 0}.hint{margin:8px 0}.clock{top:12px}.card strong{max-height:16vh}}</style></head><body><header><div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>时间块</div><span class="date" id="date"></span></header><main><section class="focus"><div><div class="eyebrow"><span class="dot"></span>此刻的安排</div><h1 id="activity"></h1><span class="range mono" id="range"></span></div><time class="clock" id="clock"></time></section><div class="toolbar"><h2>每日时间线</h2><button id="add">＋ 添加安排</button></div><div class="scale"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div><section class="track" id="track" aria-label="24 小时时间线"></section><div id="agenda" class="agenda"></div><p class="hint" id="hint"></p></main><dialog id="editor"><form id="form"><h2 id="editTitle"></h2><label for="slot">半小时时段</label><select id="slot"></select><label for="entry">固定安排</label><input id="entry" maxlength="24" required autocomplete="off"><menu><button type="button" id="remove">删除</button><button type="button" id="cancel">取消</button><button class="save">保存</button></menu></form></dialog>
+@media(max-height:500px){header{height:38px}.focus{padding:10px 0}.focus h1{font-size:26px;margin:4px 0}.toolbar{padding:8px 0}.hint{margin:8px 0}.clock{top:12px}.card strong{max-height:16vh}}</style></head><body><header><div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>时间块</div><span class="date" id="date"></span></header><main><section class="focus"><div><div class="eyebrow"><span class="dot"></span>此刻的安排</div><h1 id="activity"></h1><span class="range mono" id="range"></span></div><time class="clock" id="clock"></time></section><div class="toolbar"><h2>每日时间线</h2><button id="add">＋ 添加安排</button></div><div class="scale" id="scale"></div><section class="track" id="track" aria-label="24 小时时间线"></section><div id="agenda" class="agenda"></div><p class="hint" id="hint"></p></main><dialog id="editor"><form id="form"><h2 id="editTitle"></h2><label for="slot">半小时时段</label><select id="slot"></select><label for="entry">固定安排</label><input id="entry" maxlength="24" required autocomplete="off"><menu><button type="button" id="remove">删除</button><button type="button" id="cancel">取消</button><button class="save">保存</button></menu></form></dialog>
 <script>
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2, '0');
@@ -48,13 +51,12 @@ function tick() {
   $('range').textContent = range(slot);
   if (now !== slot) { now = slot; render(); }
 }
-function positionLabels() {
-  const area = $('agenda');
+function layoutLabels(area, above) {
   const width = area.clientWidth;
   const lanes = [];
   const positions = [];
   for (const item of area.children) {
-    const anchor = (Number(item.dataset.slot) + 0.5) * width / 48;
+    const anchor = (Number(item.dataset.slot) + (above ? 0 : 0.5)) * width / 48;
     const left = Math.max(0, Math.min(anchor - item.offsetWidth / 2, width - item.offsetWidth));
     let lane = lanes.findIndex(row => row.end + 4 <= left);
     if (lane < 0) { lane = lanes.length; lanes.push({end:0, height:0}); }
@@ -67,14 +69,28 @@ function positionLabels() {
   for (const {item, left, anchor, lane} of positions) {
     const top = lanes[lane].top;
     item.style.left = left + 'px';
-    item.style.top = top + 'px';
+    item.style[above ? 'bottom' : 'top'] = top + 'px';
     item.style.setProperty('--anchor', (anchor-left) + 'px');
     item.style.setProperty('--stem', (top+4) + 'px');
   }
   area.style.height = height + 'px';
 }
+function positionLabels() {
+  layoutLabels($('scale'), true);
+  layoutLabels($('agenda'), false);
+}
 window.addEventListener('resize', positionLabels);
 function render() {
+  const scale = $('scale');
+  scale.replaceChildren();
+  for (let i = 0; i <= 48; i++) {
+    if (!plan[i] && i % 12 !== 0) continue;
+    const tick = document.createElement('span');
+    tick.dataset.slot = i;
+    tick.textContent = plan[i] ? stamp(i) + '–' + stamp(i+1) : stamp(i);
+    if (plan[i]) tick.className = 'scheduled';
+    scale.append(tick);
+  }
   $('track').replaceChildren();
   $('agenda').replaceChildren();
   for (let i = 0; i < 48; i++) {
@@ -89,10 +105,11 @@ function render() {
     $('track').append(block);
     const item = document.createElement('button');
     item.className = 'item' + (i === now ? ' active' : '');
-    const time = document.createElement('time'), name = document.createElement('span');
-    time.textContent = stamp(i); name.textContent = plan[i];
+    item.textContent = plan[i];
     item.dataset.slot = i;
-    item.append(time,name); item.title = block.title; item.onclick = block.onclick;
+    item.title = block.title;
+    item.setAttribute('aria-label', block.title);
+    item.onclick = block.onclick;
     $('agenda').append(item);
   }
   positionLabels();
