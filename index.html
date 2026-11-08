@@ -3,8 +3,8 @@
 *{box-sizing:border-box}body{margin:0;background:#f8f8f4;color:#282d26;font:16px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}button,input{font:inherit}button{cursor:pointer;color:inherit}button:focus-visible{outline:2px solid #446649;outline-offset:3px}header,main,footer{max-width:1600px;margin:auto;padding:0 clamp(20px,5vw,90px)}header{height:82px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #d9dcd3}.brand{font-size:19px;font-weight:670;letter-spacing:2px;display:flex;gap:12px;align-items:center}.mark{display:grid;grid-template-columns:repeat(2,8px);gap:2px}.mark i{width:8px;height:8px;background:#354c39}.mark i:last-child{background:#a8be9e}.date,.mono,time,.hour,.bounds{font-family:ui-monospace,"SFMono-Regular",monospace;font-variant-numeric:tabular-nums}.date{font-size:13px;color:#666e61}.focus{padding:clamp(45px,8vh,90px) 0;display:flex;align-items:end;justify-content:space-between}.eyebrow{display:flex;align-items:center;gap:9px;color:#53694e;font-size:13px;letter-spacing:1px}.dot{width:7px;height:7px;border-radius:50%;background:#698b5e}h1{font-weight:530;letter-spacing:-.045em;font-size:clamp(42px,6vw,88px);line-height:1.22;margin:15px 0 12px;overflow-wrap:anywhere}.range{color:#6a7266;font-size:16px}.clock{font-size:clamp(32px,5vw,74px);letter-spacing:-.065em;font-weight:350}.toolbar{border-top:1px solid #cbd0c5;padding:23px 0;display:flex;align-items:center;justify-content:space-between}h2{font-size:18px;margin:0;font-weight:600}
 dialog button{border:1px solid #cdd1c6;border-radius:5px;background:transparent;padding:5px 11px}
 
-.track{container-type:inline-size;display:grid;grid-template-columns:repeat(48,minmax(0,1fr));position:relative;min-height:30px;align-items:center;background:linear-gradient(#cad1c4,#cad1c4) center/100% 1px no-repeat}
-.block{padding:0;margin:0 1px;height:calc(100cqw / 48);background:#a6b89d;border:0;border-radius:2px;min-width:0}
+.track{container-type:inline-size;position:relative;min-height:30px;align-items:center;background:linear-gradient(#cad1c4,#cad1c4) center/100% 1px no-repeat}
+.block{position:absolute;top:50%;transform:translateY(-50%);padding:0;height:calc(100cqw / 48);background:#a6b89d;border:0;border-radius:2px;min-width:0}
 .block.active{background:#496941}
 .scale{position:relative;isolation:isolate;font:11px ui-monospace,monospace;color:#687261;margin:6px 0}
 .scale span{position:absolute;width:max-content;white-space:nowrap;background:#f8f8f4;padding:2px 0}
@@ -18,24 +18,30 @@ dialog button{border:1px solid #cdd1c6;border-radius:5px;background:transparent;
 #add,dialog button{border:1px solid #cdd1c6;background:#fdfefa;padding:6px 11px;border-radius:5px}
 select{font:inherit;width:100%;padding:8px;background:white;border:1px solid #adb8a4;border-radius:4px}
 #remove{margin-right:auto}
-@media(max-width:600px){header,main{padding-inline:14px}.block{margin:0 .5px;border-radius:1px}.item{font-size:12px;max-width:min(8em,100%)}.focus{padding:26px 0}#activity{font-size:34px}}
+@media(max-width:600px){header,main{padding-inline:14px}.block{border-radius:1px}.item{font-size:12px;max-width:min(8em,100%)}.focus{padding:26px 0}#activity{font-size:34px}}
 .hint{margin:26px 0;color:#70776b;font-size:13px}dialog{border:1px solid #cbd1c3;border-radius:10px;padding:26px;width:min(360px,90vw);background:#f8f8f4;color:inherit}dialog::backdrop{background:#27332144}dialog label{display:block;margin:20px 0 7px}input{width:100%;padding:10px;border:1px solid #adb8a4;border-radius:4px}dialog menu{padding:0;margin:20px 0 0;display:flex;justify-content:end;gap:8px}dialog .save{background:#354c39;color:white}@media(max-width:580px){header{height:64px}.focus{align-items:start;position:relative}.clock{position:absolute;top:38px;right:0;font-size:25px}.focus h1{font-size:42px;margin-top:24px}.toolbar{padding:18px 0}.overview{margin-top:24px}.controls button{padding:5px 9px}}
-@media(max-height:500px){header{height:38px}.focus{padding:10px 0}.focus h1{font-size:26px;margin:4px 0}.toolbar{padding:8px 0}.hint{margin:8px 0}.clock{top:12px}.card strong{max-height:16vh}}.header-actions{display:flex;align-items:center;gap:clamp(8px,2vw,24px)}.end-controls{display:flex;gap:8px}.end-controls select{min-width:0}.end-controls button{white-space:nowrap}#overlap{font-size:13px;color:#655236;line-height:1.5}</style></head><body><header><div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>时间块</div><div class="header-actions"><span class="date" id="date"></span><button id="add">＋ 添加安排</button></div></header><main><section class="focus"><div><div class="eyebrow"><span class="dot"></span>此刻的安排</div><h1 id="activity"></h1><span class="range mono" id="range"></span></div><time class="clock" id="clock"></time></section><div class="toolbar"><h2>每日时间线</h2></div><div class="scale" id="scale"></div><section class="track" id="track" aria-label="24 小时时间线"></section><div id="agenda" class="agenda"></div><p class="hint" id="hint"></p></main><dialog id="editor"><form id="form"><h2 id="editTitle"></h2><label for="slot">开始时间</label><select id="slot"></select><label for="end">结束时间</label><div class="end-controls"><select id="end"></select><button type="button" id="extend">＋30 分钟</button></div><p id="overlap" role="status" hidden></p><label for="entry">固定安排</label><input id="entry" maxlength="24" required autocomplete="off"><menu><button type="button" id="remove">删除</button><button type="button" id="cancel">取消</button><button class="save">保存</button></menu></form></dialog>
+@media(max-height:500px){header{height:38px}.focus{padding:10px 0}.focus h1{font-size:26px;margin:4px 0}.toolbar{padding:8px 0}.hint{margin:8px 0}.clock{top:12px}.card strong{max-height:16vh}}.header-actions{display:flex;align-items:center;gap:clamp(8px,2vw,24px)}.times{display:flex;gap:12px}.times label{min-width:0;flex:1}.times input{margin-top:7px;font-variant-numeric:tabular-nums}#overlap{font-size:13px;color:#655236;line-height:1.5}</style></head><body><header><div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>时间块</div><div class="header-actions"><span class="date" id="date"></span><button id="add">＋ 添加安排</button></div></header><main><section class="focus"><div><div class="eyebrow"><span class="dot"></span>此刻的安排</div><h1 id="activity"></h1><span class="range mono" id="range"></span></div><time class="clock" id="clock"></time></section><div class="toolbar"><h2>每日时间线</h2></div><div class="scale" id="scale"></div><section class="track" id="track" aria-label="24 小时时间线"></section><div id="agenda" class="agenda"></div><p class="hint" id="hint"></p></main><dialog id="editor"><form id="form"><h2 id="editTitle"></h2><div id="manage"><label for="existing">选择安排</label><select id="existing"></select></div><div class="times"><label>开始时间<input id="start" placeholder="09:10" maxlength="5" required></label><label>结束时间<input id="end" placeholder="10:45" maxlength="5" required></label></div><p id="overlap" role="status" hidden></p><label for="entry">固定安排</label><input id="entry" maxlength="24" required autocomplete="off"><menu><button type="button" id="remove">删除</button><button type="button" id="cancel">取消</button><button class="save">保存</button></menu></form></dialog>
 <script>
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2, '0');
-const stamp = i => pad(Math.floor(i / 2)) + (i % 2 ? ':30' : ':00');
+const stamp = i => pad(Math.floor(i / 60)) + ':' + pad(i % 60);
 const range = (start, end) => stamp(start) + ' — ' + stamp(end);
-const key = 'day-blocks.ranges.v1';
+const key = 'day-blocks.minutes.v1';
 let plan = {};
 try {
   const saved = JSON.parse(localStorage.getItem(key));
   if (saved && typeof saved === 'object') plan = saved;
   else {
+    const ranges = JSON.parse(localStorage.getItem('day-blocks.ranges.v1'));
+    if (ranges) {
+      for (const [slot, activity] of Object.entries(ranges)) {
+        plan[Number(slot)*30] = {name:activity.name, end:activity.end*30};
+      }
+    } else {
     const halfHours = JSON.parse(localStorage.getItem('day-blocks.half-hours.v1'));
     if (halfHours) {
       for (let i = 0; i < 48; i++) {
-        if (typeof halfHours[i] === 'string' && halfHours[i]) plan[i] = {name:halfHours[i], end:i+1};
+        if (typeof halfHours[i] === 'string' && halfHours[i]) plan[i*30] = {name:halfHours[i], end:(i+1)*30};
       }
     } else {
     // Keep edits from the hourly version. Untouched sample activities start empty.
@@ -43,21 +49,22 @@ try {
     const samples = ['睡眠','睡眠','睡眠','睡眠','睡眠','睡眠','起床洗漱','早餐','散步','专注工作','专注工作','处理事务','午餐','午休','专注工作','专注工作','整理收尾','运动','晚餐','自由时间','阅读','洗漱放松','准备入睡','睡眠'];
     if (Array.isArray(previous)) samples.forEach((sample,h) => {
       if (typeof previous[h] === 'string' && previous[h].trim() && previous[h] !== sample)
-        plan[h*2] = {name:previous[h], end:h*2+2};
+        plan[h*60] = {name:previous[h], end:(h+1)*60};
     });
+    }
     }
   }
 } catch {}
 let now = -1;
 function tick() {
   const d = new Date();
-  const slot = d.getHours()*2 + Math.floor(d.getMinutes()/30);
+  const slot = d.getHours()*60 + d.getMinutes();
   $('date').textContent = d.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'long'});
   $('clock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
   const start = Object.keys(plan).map(Number).find(i => i <= slot && slot < plan[i].end);
   const activity = plan[start];
   $('activity').textContent = activity?.name || '暂无安排';
-  $('range').textContent = activity ? range(start, activity.end) : range(slot, slot+1);
+  $('range').textContent = activity ? range(start, activity.end) : '';
   if (now !== slot) { now = slot; render(); }
 }
 function layoutLabels(area, above) {
@@ -65,7 +72,7 @@ function layoutLabels(area, above) {
   const lanes = [];
   const positions = [];
   for (const item of area.children) {
-    const anchor = Number(item.dataset.slot) * width / 48;
+    const anchor = Number(item.dataset.slot) * width / 1440;
     const left = Math.max(0, Math.min(anchor - item.offsetWidth / 2, width - item.offsetWidth));
     let lane = lanes.findIndex(row => row.end + 4 <= left);
     if (lane < 0) { lane = lanes.length; lanes.push({end:0, height:0}); }
@@ -92,8 +99,9 @@ window.addEventListener('resize', positionLabels);
 function render() {
   const scale = $('scale');
   scale.replaceChildren();
-  for (let i = 0; i <= 48; i++) {
-    if (!plan[i] && i % 12 !== 0) continue;
+  const starts = Object.keys(plan).map(Number);
+  const marks = [...new Set([0, 360, 720, 1080, 1440, ...starts])].sort((a,b) => a-b);
+  for (const i of marks) {
     const tick = document.createElement('span');
     tick.dataset.slot = i;
     tick.textContent = plan[i] ? stamp(i) + '–' + stamp(plan[i].end) : stamp(i);
@@ -102,12 +110,11 @@ function render() {
   }
   $('track').replaceChildren();
   $('agenda').replaceChildren();
-  for (let i = 0; i < 48; i++) {
-    if (!plan[i]) continue;
+  for (const i of starts) {
     const block = document.createElement('span');
     block.className = 'block' + (i <= now && now < plan[i].end ? ' active' : '');
-    block.style.gridColumn = (i+1) + ' / ' + (plan[i].end+1);
-    block.style.gridRow = '1';
+    block.style.left = (i / 1440 * 100) + '%';
+    block.style.width = ((plan[i].end-i) / 1440 * 100) + '%';
     block.setAttribute('aria-hidden', 'true');
     $('track').append(block);
     const item = document.createElement('span');
@@ -119,55 +126,51 @@ function render() {
   positionLabels();
   $('hint').textContent = $('track').childElementCount ? '' : '添加第一项安排，它会出现在对应的时段。';
 }
-function coveredStarts(start, end) {
-  return Object.keys(plan).map(Number).filter(i => start < i && i < end);
+function readTime(id) {
+  const text = $(id).value.trim().replace('：', ':');
+  if (id === 'end' && text === '24:00') return 1440;
+  const match = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(text);
+  return match ? Number(match[1])*60 + Number(match[2]) : NaN;
 }
-function updateEnd() {
-  const end = Number($('end').value);
-  $('extend').disabled = end === 48;
-  const affected = coveredStarts(Number($('slot').value), end);
-  const status = $('overlap');
-  status.hidden = affected.length === 0;
-  status.textContent = affected.length ? '保存将替换以下时段：' + affected.map(i =>
-    range(i, Math.min(end, plan[i].end)) + ' ' + plan[i].name
+function affectedStarts(start, end) {
+  return Object.keys(plan).filter(i =>
+    i !== $('existing').value && Number(i) < end && start < plan[i].end);
+}
+function validateTimes() {
+  const start = readTime('start'), end = readTime('end');
+  $('start').setCustomValidity(Number.isFinite(start) ? '' : '请输入开始时间，例如 09:10');
+  $('end').setCustomValidity(!Number.isFinite(end) ? '请输入结束时间，例如 10:45 或 24:00' :
+    end <= start ? '结束时间须晚于开始时间' : '');
+  const affected = start < end ? affectedStarts(start, end) : [];
+  $('overlap').hidden = affected.length === 0;
+  $('overlap').textContent = affected.length ? '保存将替换以下时段：' + affected.map(i =>
+    range(Math.max(start, Number(i)), Math.min(end, plan[i].end)) + ' ' + plan[i].name
   ).join('、') : '';
 }
-$('end').onchange = updateEnd;
-$('extend').onclick = () => {
-  $('end').selectedIndex++;
-  updateEnd();
-};
-function showSelectedSlot() {
-  const start = Number($('slot').value);
-  const activity = plan[start];
-  const endSelect = $('end');
-  endSelect.replaceChildren();
-  for (let end = start+1; end <= 48; end++) {
-    const hours = (end-start)/2;
-    endSelect.add(new Option(stamp(end) + '（' + hours + ' 小时）', String(end)));
-  }
-  endSelect.value = String(activity?.end ?? start+1);
-  updateEnd();
+function loadSelection() {
+  const selected = $('existing').value;
+  const activity = plan[selected];
+  const start = activity ? Number(selected) : now;
+  $('start').value = stamp(start);
+  $('end').value = stamp(activity?.end ?? Math.min(start+30, 1440));
   $('entry').value = activity?.name || '';
+  $('entry').setCustomValidity('');
   $('remove').hidden = !activity;
   $('editTitle').textContent = activity ? '修改安排' : '添加安排';
-  $('entry').setCustomValidity('');
+  validateTimes();
 }
 function openEditor() {
-  const select = $('slot');
-  select.replaceChildren();
-  const free = [];
-  for (let i = 0; i < 48; i++) {
-    const activity = plan[i];
-    select.add(new Option(stamp(i) + (activity ? ' · ' + activity.name : ''), String(i)));
-    if (activity) i = activity.end-1;
-    else free.push(i);
+  const existing = $('existing');
+  existing.replaceChildren(new Option('新安排',''));
+  for (const [start, activity] of Object.entries(plan)) {
+    existing.add(new Option(range(Number(start), activity.end) + ' · ' + activity.name, start));
   }
-  select.value = String(free.find(i => i >= now) ?? free[0] ?? select.options[0].value);
-  showSelectedSlot();
+  $('manage').hidden = existing.length === 1;
+  loadSelection();
   $('editor').showModal();
 }
-$('slot').onchange = showSelectedSlot;
+$('existing').onchange = loadSelection;
+$('start').oninput = $('end').oninput = validateTimes;
 function save() {
   $('editor').close(); render(); tick();
   try { localStorage.setItem(key, JSON.stringify(plan)); }
@@ -175,17 +178,20 @@ function save() {
 }
 $('add').onclick = openEditor;
 $('cancel').onclick = () => $('editor').close();
-$('remove').onclick = () => { delete plan[$('slot').value]; save(); };
+$('remove').onclick = () => { delete plan[$('existing').value]; save(); };
 $('entry').oninput = () => $('entry').setCustomValidity('');
 $('form').onsubmit = e => {
   e.preventDefault();
   const value = $('entry').value.trim();
   if (!value) { $('entry').setCustomValidity('请输入安排'); $('entry').reportValidity(); return; }
-  const start = Number($('slot').value);
-  const end = Number($('end').value);
-  for (const i of coveredStarts(start, end)) {
+  validateTimes();
+  if (!$('form').reportValidity()) return;
+  const start = readTime('start'), end = readTime('end');
+  delete plan[$('existing').value];
+  for (const i of affectedStarts(start, end)) {
     const previous = plan[i];
     delete plan[i];
+    if (Number(i) < start) plan[i] = {name:previous.name, end:start};
     if (previous.end > end) plan[end] = previous;
   }
   plan[start] = {name:value, end};
