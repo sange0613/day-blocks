@@ -20,7 +20,7 @@ select{font:inherit;width:100%;padding:8px;background:white;border:1px solid #ad
 #remove{margin-right:auto}
 @media(max-width:600px){header,main{padding-inline:14px}.block{margin:0 .5px;border-radius:1px}.item{font-size:12px;max-width:min(8em,100%)}.focus{padding:26px 0}#activity{font-size:34px}}
 .hint{margin:26px 0;color:#70776b;font-size:13px}dialog{border:1px solid #cbd1c3;border-radius:10px;padding:26px;width:min(360px,90vw);background:#f8f8f4;color:inherit}dialog::backdrop{background:#27332144}dialog label{display:block;margin:20px 0 7px}input{width:100%;padding:10px;border:1px solid #adb8a4;border-radius:4px}dialog menu{padding:0;margin:20px 0 0;display:flex;justify-content:end;gap:8px}dialog .save{background:#354c39;color:white}@media(max-width:580px){header{height:64px}.focus{align-items:start;position:relative}.clock{position:absolute;top:38px;right:0;font-size:25px}.focus h1{font-size:42px;margin-top:24px}.toolbar{padding:18px 0}.overview{margin-top:24px}.controls button{padding:5px 9px}}
-@media(max-height:500px){header{height:38px}.focus{padding:10px 0}.focus h1{font-size:26px;margin:4px 0}.toolbar{padding:8px 0}.hint{margin:8px 0}.clock{top:12px}.card strong{max-height:16vh}}.header-actions{display:flex;align-items:center;gap:clamp(8px,2vw,24px)}</style></head><body><header><div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>时间块</div><div class="header-actions"><span class="date" id="date"></span><button id="add">＋ 添加安排</button></div></header><main><section class="focus"><div><div class="eyebrow"><span class="dot"></span>此刻的安排</div><h1 id="activity"></h1><span class="range mono" id="range"></span></div><time class="clock" id="clock"></time></section><div class="toolbar"><h2>每日时间线</h2></div><div class="scale" id="scale"></div><section class="track" id="track" aria-label="24 小时时间线"></section><div id="agenda" class="agenda"></div><p class="hint" id="hint"></p></main><dialog id="editor"><form id="form"><h2 id="editTitle"></h2><label for="slot">开始时间</label><select id="slot"></select><label for="end">结束时间</label><select id="end"></select><label for="entry">固定安排</label><input id="entry" maxlength="24" required autocomplete="off"><menu><button type="button" id="remove">删除</button><button type="button" id="cancel">取消</button><button class="save">保存</button></menu></form></dialog>
+@media(max-height:500px){header{height:38px}.focus{padding:10px 0}.focus h1{font-size:26px;margin:4px 0}.toolbar{padding:8px 0}.hint{margin:8px 0}.clock{top:12px}.card strong{max-height:16vh}}.header-actions{display:flex;align-items:center;gap:clamp(8px,2vw,24px)}.end-controls{display:flex;gap:8px}.end-controls select{min-width:0}.end-controls button{white-space:nowrap}#overlap{font-size:13px;color:#655236;line-height:1.5}</style></head><body><header><div class="brand"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>时间块</div><div class="header-actions"><span class="date" id="date"></span><button id="add">＋ 添加安排</button></div></header><main><section class="focus"><div><div class="eyebrow"><span class="dot"></span>此刻的安排</div><h1 id="activity"></h1><span class="range mono" id="range"></span></div><time class="clock" id="clock"></time></section><div class="toolbar"><h2>每日时间线</h2></div><div class="scale" id="scale"></div><section class="track" id="track" aria-label="24 小时时间线"></section><div id="agenda" class="agenda"></div><p class="hint" id="hint"></p></main><dialog id="editor"><form id="form"><h2 id="editTitle"></h2><label for="slot">开始时间</label><select id="slot"></select><label for="end">结束时间</label><div class="end-controls"><select id="end"></select><button type="button" id="extend">＋30 分钟</button></div><p id="overlap" role="status" hidden></p><label for="entry">固定安排</label><input id="entry" maxlength="24" required autocomplete="off"><menu><button type="button" id="remove">删除</button><button type="button" id="cancel">取消</button><button class="save">保存</button></menu></form></dialog>
 <script>
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2, '0');
@@ -119,6 +119,24 @@ function render() {
   positionLabels();
   $('hint').textContent = $('track').childElementCount ? '' : '添加第一项安排，它会出现在对应的时段。';
 }
+function coveredStarts(start, end) {
+  return Object.keys(plan).map(Number).filter(i => start < i && i < end);
+}
+function updateEnd() {
+  const end = Number($('end').value);
+  $('extend').disabled = end === 48;
+  const affected = coveredStarts(Number($('slot').value), end);
+  const status = $('overlap');
+  status.hidden = affected.length === 0;
+  status.textContent = affected.length ? '保存将替换以下时段：' + affected.map(i =>
+    range(i, Math.min(end, plan[i].end)) + ' ' + plan[i].name
+  ).join('、') : '';
+}
+$('end').onchange = updateEnd;
+$('extend').onclick = () => {
+  $('end').selectedIndex++;
+  updateEnd();
+};
 function showSelectedSlot() {
   const start = Number($('slot').value);
   const activity = plan[start];
@@ -127,9 +145,9 @@ function showSelectedSlot() {
   for (let end = start+1; end <= 48; end++) {
     const hours = (end-start)/2;
     endSelect.add(new Option(stamp(end) + '（' + hours + ' 小时）', String(end)));
-    if (plan[end]) break;
   }
   endSelect.value = String(activity?.end ?? start+1);
+  updateEnd();
   $('entry').value = activity?.name || '';
   $('remove').hidden = !activity;
   $('editTitle').textContent = activity ? '修改安排' : '添加安排';
@@ -163,7 +181,14 @@ $('form').onsubmit = e => {
   e.preventDefault();
   const value = $('entry').value.trim();
   if (!value) { $('entry').setCustomValidity('请输入安排'); $('entry').reportValidity(); return; }
-  plan[$('slot').value] = {name:value, end:Number($('end').value)};
+  const start = Number($('slot').value);
+  const end = Number($('end').value);
+  for (const i of coveredStarts(start, end)) {
+    const previous = plan[i];
+    delete plan[i];
+    if (previous.end > end) plan[end] = previous;
+  }
+  plan[start] = {name:value, end};
   save();
 };
 tick(); setInterval(tick,1000);
